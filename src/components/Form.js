@@ -104,19 +104,19 @@ const Form = ({
 
   const toJson = JSON.parse(formQuery.questions);
 
-  const updateItem = (id, itemAttributes) => {
-    var index = stepQuestion.findIndex((x) => x.id === id);
-    if (index === -1) {
-      // handle error
-    } else
-      setStepQuestion({
-        items: [
-          ...stepQuestion.slice(0, index),
-          Object.assign({}, stepQuestion[index], itemAttributes),
-          ...stepQuestion.slice(index + 1),
-        ],
-      });
-  };
+  // const updateItem = (id, itemAttributes) => {
+  //   var index = stepQuestion.findIndex((x) => x.id === id);
+  //   if (index === -1) {
+  //     // handle error
+  //   } else
+  //     setStepQuestion({
+  //       items: [
+  //         ...stepQuestion.slice(0, index),
+  //         Object.assign({}, stepQuestion[index], itemAttributes),
+  //         ...stepQuestion.slice(index + 1),
+  //       ],
+  //     });
+  // };
 
   useEffect(() => {
     let startingPrice = parseInt(formQuery.startPrice, 10);
@@ -124,7 +124,7 @@ const Form = ({
   }, [formQuery.startPrice]);
 
   const calculatePrice = (e) => {
-    let sum = parseInt(e, 10);
+    // let sum = parseInt(e, 10);
     setStepsSum([...stepsSum, stepValue]);
   };
 
@@ -155,8 +155,8 @@ const Form = ({
         ...stepQuestion,
         // [toJson.product.questions[step].question, stepAnswer],
         {
-          ["question"]: toJson.product.questions[step].question,
-          ["answer"]: stepAnswer,
+          question: toJson.product.questions[step].question,
+          answer: stepAnswer,
         },
       ]);
       setStep(step + 1);
@@ -184,9 +184,9 @@ const Form = ({
     setCartItems([
       ...cartItems,
       {
-        ["productName"]: formQuery.name,
-        ["proposedPrice"]: totalPrice + total,
-        ["productQuestions"]: stepQuestion,
+        productName: formQuery.name,
+        proposedPrice: totalPrice + total,
+        productQuestions: stepQuestion,
       },
     ]);
     setCurrentProduct();

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { NextUIProvider } from "@nextui-org/react";
 import Search from "./components/Search";
 import styled from "styled-components";

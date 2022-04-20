@@ -57,7 +57,7 @@ const Checkout = ({ cartItems }) => {
   const [typedCity, setTypedCity] = useState();
   const [countryError, setCountryError] = useState(false);
 
-  const mapRequest = cartItems.map((node) => <table>{node.productName}</table>);
+  // const mapRequest = cartItems.map((node) => <table>{node.productName}</table>);
 
   var bodyFormData = new FormData();
   bodyFormData.append("body", cartItems);
@@ -223,17 +223,17 @@ const Checkout = ({ cartItems }) => {
   );
 };
 
-const EmailTemplate = ({ cartItems }) => {
-  return (
-    <table>
-      {cartItems.map((node, index) => (
-        <>
-          <span>{node.productName}</span>
-          <span>{node.proposedPrice}</span>
-        </>
-      ))}
-    </table>
-  );
-};
+// const EmailTemplate = ({ cartItems }) => {
+//   return (
+//     <table>
+//       {cartItems.map((node, index) => (
+//         <>
+//           <span>{node.productName}</span>
+//           <span>{node.proposedPrice}</span>
+//         </>
+//       ))}
+//     </table>
+//   );
+// };
 
 export default Checkout;
