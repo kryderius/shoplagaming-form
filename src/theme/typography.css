@@ -1,0 +1,21 @@
+@font-face {
+  font-family: Rubik;
+  font-weight: 400;
+  font-style: normal;
+  src: url("../assets/fonts/Rubik-Regular.ttf") format("truetype");
+  font-display: auto;
+}
+@font-face {
+  font-family: Rubik;
+  font-weight: 700;
+  font-style: normal;
+  src: url("../assets/fonts/Rubik-Bold.ttf") format("truetype");
+  font-display: auto;
+}
+@font-face {
+  font-family: Rubik;
+  font-weight: 300;
+  font-style: normal;
+  src: url("../assets/fonts/Rubik-Light.ttf") format("truetype");
+  font-display: auto;
+}
