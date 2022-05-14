@@ -30,7 +30,7 @@ const ResultBox = styled.div`
   display: flex;
 
   &:hover {
-    background-color: #f4f4f4;
+    background-color: #ededed;
   }
 `;
 
@@ -55,19 +55,39 @@ const ResultItemName = styled(Text)`
   font-weight: 700;
 `;
 
-const Search = ({ cartItems, setCartItems }) => {
+const BottomText = styled(Text)`
+  font-family: "Rubik", sans-serif;
+  text-align: center;
+  font-weight: 400;
+  margin-top: 15px;
+
+  &.isHidden {
+    display: none;
+  }
+`;
+
+const Search = ({
+  cartItems,
+  setCartItems,
+  setAllProducts,
+  allProducts,
+  currentProduct,
+  setCurrentProduct,
+  setStepQuestion,
+  stepQuestion,
+  setIsCart,
+}) => {
   const [query, setQuery] = useState();
   const [isLoading, setIsLoading] = useState(false);
-  const [currentProduct, setCurrentProduct] = useState(null);
-  const [stepQuestion, setStepQuestion] = useState([]);
+  // const [currentProduct, setCurrentProduct] = useState(null);
 
   const handleSearch = async (e) => {
+    setIsLoading(true);
     if (!e) {
       setQuery();
     } else {
-      setIsLoading(true);
       axios
-        .get(`http://localhost/shop/wp-json/wp/v2/products/${e}`)
+        .get(`https://shoplagaming.co.uk/wp-json/wp/v2/products/${e}`)
         .then((res) => {
           setQuery(res);
         })
@@ -82,6 +102,7 @@ const Search = ({ cartItems, setCartItems }) => {
     setCurrentProduct(e);
     setQuery();
     setStepQuestion([]);
+    setIsCart(false);
   };
 
   return (
@@ -93,9 +114,14 @@ const Search = ({ cartItems, setCartItems }) => {
         contentRight={<Icon icon="ic:twotone-search" />}
         aria-label="Search"
       />
+      <BottomText className={query && "isHidden"}>
+        Start typing to select a product you want to sell from the list.
+      </BottomText>
       <ResultsContainer className={query && "active"}>
         {isLoading ? (
-          <p>Ładowanie...</p>
+          <Text style={{ fontFamily: '"Rubik", sans-serif' }}>
+            Ładowanie...
+          </Text>
         ) : query ? (
           <>
             {query.data === "Brak wyników" ? (
@@ -110,7 +136,16 @@ const Search = ({ cartItems, setCartItems }) => {
                     <ResultItemName size={16} weight="medium">
                       {node.name}
                     </ResultItemName>
-                    <Text style={{ fontFamily: '"Rubik", sans-serif' }}>
+                    <Text>
+                      {node.description &&
+                        node.description.substring(0, 100) + "..."}
+                    </Text>
+                    <Text
+                      style={{
+                        fontFamily: '"Rubik", sans-serif',
+                        fontWeight: "700",
+                      }}
+                    >
                       £{node.startPrice}
                     </Text>
                   </ResultBoxRight>
@@ -130,6 +165,10 @@ const Search = ({ cartItems, setCartItems }) => {
           stepQuestion={stepQuestion}
           setStepQuestion={setStepQuestion}
           setCurrentProduct={setCurrentProduct}
+          currentProduct={currentProduct}
+          setAllProducts={setAllProducts}
+          allProducts={allProducts}
+          setIsCart={setIsCart}
         />
       )}
     </Container>

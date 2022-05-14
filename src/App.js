@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { NextUIProvider } from "@nextui-org/react";
 import Search from "./components/Search";
 import styled from "styled-components";
@@ -6,21 +6,32 @@ import Cart from "./components/Cart";
 import GlobalStyles from "./theme/globalStyles.js";
 import Quote from "./components/Quote";
 import Checkout from "./components/Checkout";
-import axios from "axios";
+import Confirmation from "./components/Confirmation";
+import Header from "./components/Header";
+import Helmet from "react-helmet";
 
 const Main = styled.main`
-  height: 100vh;
+  height: 88vh;
 `;
 
 const PageContainer = styled.div`
   width: 100%;
+
   height: 100%;
   padding: 25px;
+
+  @media (max-width: 992px) {
+    padding: 10px;
+  }
 `;
 
 const PageWrapper = styled.div`
+  height: auto !important; /* real browsers */
+  height: 100%; /* IE6: treaded as min-height*/
+
+  min-height: 100%; /* real browsers */
   width: 100%;
-  height: 100%;
+  /* height: 100%; */
   padding: 50px 15px;
   background-color: #e3e3e3;
   border-radius: 20px;
@@ -28,48 +39,101 @@ const PageWrapper = styled.div`
 `;
 
 const App = () => {
-  const [cartItems, setCartItems] = useState([]);
+  const [cartItems, setCartItems] = useState(
+    JSON.parse(localStorage.getItem("cart"))
+  );
+  const [storageCart, setStorageCart] = useState([]);
   const [isQuote, setIsQuote] = useState(false);
   const [isApproved, setIsApproved] = useState(false);
+  const [isConfirmation, setIsConfirmation] = useState(false);
+  const [isInitiallyFetched, setIsInitiallyFetched] = useState(false);
+  const [allProducts, setAllProducts] = useState(
+    JSON.parse(localStorage.getItem("allProducts"))
+  );
+  const [currentProduct, setCurrentProduct] = useState(null);
+  const [stepQuestion, setStepQuestion] = useState([]);
+  const [isCart, setIsCart] = useState(true);
 
   const handleRemoveFromCart = (e) => {
     let newCartItems = cartItems.filter((_, i) => i !== e);
+    let newAllProducts = allProducts.filter((_, i) => i !== e);
     setCartItems(newCartItems);
+    setAllProducts(newAllProducts);
   };
 
-  const formData = new FormData();
-
-  formData.append("contact_name", "John Doe");
-  formData.append("contact_email", "john.doe@example.com");
-  formData.append("contact_message", "Just testing");
-
-  const sendFakeMessage = () => {
-    axios
-      .post("https://shoplademo.000webhostapp.com/wp-json/contact/v1/send", {
-        body: formData,
-      })
-      .then((response) => console.log(response))
-      .catch((error) => console.log(error));
+  const handleEditFromCart = (e) => {
+    let newCartItems = cartItems.filter((_, i) => i !== e);
+    let newAllProducts = allProducts.filter((_, i) => i !== e);
+    setCartItems(newCartItems);
+    setAllProducts(newAllProducts);
+    setStepQuestion([]);
+    setCurrentProduct(allProducts[e]);
+    setIsCart(false);
   };
+
+  useEffect(() => {
+    let prev_items = JSON.parse(localStorage.getItem("cart")) || [];
+    let all_items = JSON.parse(localStorage.getItem("allProducts")) || [];
+
+    setCartItems(prev_items);
+    setAllProducts(all_items);
+    setIsInitiallyFetched(true);
+  }, []);
+
+  useEffect(() => {
+    if (isInitiallyFetched) {
+      localStorage.setItem("cart", JSON.stringify(cartItems));
+      localStorage.setItem("allProducts", JSON.stringify(allProducts));
+    }
+  }, [cartItems, allProducts]);
+
+  useEffect(() => {
+    if (cartItems && cartItems.length === 0) {
+      setIsQuote(false);
+    }
+    // if (cartItems == null) {
+    //   setIsQuote(false);
+    // }
+  }, [cartItems]);
 
   return (
     <NextUIProvider>
+      <Helmet>
+        <title>We Buy - Shopla</title>
+      </Helmet>
       <GlobalStyles />
-      <head>
-        <script src="https://smtpjs.com/v3/smtp.js"></script>
-      </head>
+
       <Main className="App">
+        <Header />
         <PageContainer>
-          <button onClick={sendFakeMessage}>Wyślij</button>
           <PageWrapper>
             {!isQuote && !isApproved && (
-              <Search cartItems={cartItems} setCartItems={setCartItems} />
+              <Search
+                cartItems={cartItems}
+                setCartItems={setCartItems}
+                allProducts={allProducts}
+                setAllProducts={setAllProducts}
+                currentProduct={currentProduct}
+                setCurrentProduct={setCurrentProduct}
+                stepQuestion={stepQuestion}
+                setStepQuestion={setStepQuestion}
+                setIsCart={setIsCart}
+              />
             )}
-            {!isQuote && cartItems.length !== 0 && !isApproved && (
+            {/* {!isQuote && cartItems.length !== 0 && !isApproved && (
               <Cart
                 cartItems={cartItems}
                 setIsQuote={setIsQuote}
                 handleRemoveFromCart={handleRemoveFromCart}
+                handleEditFromCart={handleEditFromCart}
+              />
+            )} */}
+            {isCart && cartItems?.length !== 0 && !isApproved && !isQuote && (
+              <Cart
+                cartItems={cartItems}
+                setIsQuote={setIsQuote}
+                handleRemoveFromCart={handleRemoveFromCart}
+                handleEditFromCart={handleEditFromCart}
               />
             )}
             {isQuote && (
@@ -77,9 +141,16 @@ const App = () => {
                 cartItems={cartItems}
                 setIsApproved={setIsApproved}
                 setIsQuote={setIsQuote}
+                handleRemoveFromCart={handleRemoveFromCart}
               />
             )}
-            {isApproved && <Checkout cartItems={cartItems} />}
+            {isApproved && !isConfirmation && (
+              <Checkout
+                cartItems={cartItems}
+                setIsConfirmation={setIsConfirmation}
+              />
+            )}
+            {isConfirmation && <Confirmation />}
           </PageWrapper>
         </PageContainer>
       </Main>

@@ -3,16 +3,41 @@ import styled from "styled-components";
 import { Text } from "@nextui-org/react";
 
 const Container = styled.div`
-  max-width: 900px;
+  /* max-width: 900px;
   margin: 5px auto 0 auto;
   background-color: #f4f4f4;
   border-radius: 10px;
   padding: 15px;
-  border: 1px solid #d6d6d6;
+  border: 1px solid #d6d6d6; */
+  max-width: 900px;
+  margin: 5px auto 0 auto;
+  display: flex;
+  flex-direction: column;
+`;
+
+const Wrapper = styled.div`
+  background-color: #f4f4f4;
+  border-radius: 10px;
+  padding: 15px;
+  border: 2px solid #d6d6d6;
 `;
 
 const Pagination = styled.div`
   display: flex;
+  position: relative;
+  margin-bottom: 15px;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 104%;
+    transform: translateX(-2%);
+    height: 2px;
+    background-color: #d6d6d6;
+    z-index: 1;
+  }
 `;
 
 const PaginationDot = styled.div`
@@ -25,6 +50,7 @@ const PaginationDot = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 2;
 
   &:not(:last-child) {
     margin-right: 15px;
@@ -61,6 +87,7 @@ const AnswerLabel = styled.label`
 const ButtonsWrapper = styled.div`
   display: flex;
   justify-content: space-between;
+  margin-top: 15px;
 `;
 
 const NavButton = styled.button`
@@ -82,6 +109,36 @@ const StyledNavButton = styled(NavButton)`
   width: 120px;
 `;
 
+const AnswersContainer = styled.div`
+  padding-left: 15px;
+`;
+
+const ExplanationWrapper = styled.div`
+  padding-bottom: 15px;
+  padding-top: 15px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 104%;
+    transform: translateX(-2%);
+    height: 2px;
+    background-color: #d6d6d6;
+    z-index: 1;
+  }
+`;
+
+const ExplanationQuestion = styled(Text)``;
+
+const ExplanationDescription = styled(Text)`
+  padding-left: 10px;
+`;
+
 const Form = ({
   formQuery,
   cartItems,
@@ -89,11 +146,12 @@ const Form = ({
   stepQuestion,
   setStepQuestion,
   setCurrentProduct,
+  setAllProducts,
+  currentProduct,
+  allProducts,
+  setIsCart,
 }) => {
   const [step, setStep] = useState(0);
-  // const [totalPrice, setTotalPrice] = useState(
-  //   parseInt(formQuery.startPrice, 10)
-  // );
 
   const [totalPrice, setTotalPrice] = useState();
   const [isChecked, setIsChecked] = useState(false);
@@ -104,27 +162,12 @@ const Form = ({
 
   const toJson = JSON.parse(formQuery.questions);
 
-  // const updateItem = (id, itemAttributes) => {
-  //   var index = stepQuestion.findIndex((x) => x.id === id);
-  //   if (index === -1) {
-  //     // handle error
-  //   } else
-  //     setStepQuestion({
-  //       items: [
-  //         ...stepQuestion.slice(0, index),
-  //         Object.assign({}, stepQuestion[index], itemAttributes),
-  //         ...stepQuestion.slice(index + 1),
-  //       ],
-  //     });
-  // };
-
   useEffect(() => {
     let startingPrice = parseInt(formQuery.startPrice, 10);
     setTotalPrice(startingPrice);
   }, [formQuery.startPrice]);
 
   const calculatePrice = (e) => {
-    // let sum = parseInt(e, 10);
     setStepsSum([...stepsSum, stepValue]);
   };
 
@@ -153,7 +196,6 @@ const Form = ({
     } else {
       setStepQuestion([
         ...stepQuestion,
-        // [toJson.product.questions[step].question, stepAnswer],
         {
           question: toJson.product.questions[step].question,
           answer: stepAnswer,
@@ -180,7 +222,6 @@ const Form = ({
   );
 
   const handleAddToCartButton = () => {
-    // setCartItems([...cartItems, [formQuery.name, stepQuestion]]);
     setCartItems([
       ...cartItems,
       {
@@ -189,64 +230,100 @@ const Form = ({
         productQuestions: stepQuestion,
       },
     ]);
+    setAllProducts([...allProducts, currentProduct]);
     setCurrentProduct();
+    setIsCart(true);
   };
+
+  console.log(toJson);
 
   return (
     <Container>
-      <Text h2 size={18} weight="bold">
-        {formQuery.name}
-      </Text>
-      {/* <Text size={16}>Starting price: {totalPrice}</Text> */}
-      <Pagination>
-        {toJson.product.questions.map((node, index) => (
-          <PaginationDot className={step >= index && "active"} key={index}>
-            {index + 1}
-          </PaginationDot>
-        ))}
-      </Pagination>
-      {toJson.product.questions.map(
-        (node, index) =>
-          step === index && (
-            <>
-              <Text
-                size={18}
-                key={index}
-                style={{
-                  paddingBottom: "10px",
-                  fontFamily: '"Rubik", sans-serif',
-                }}
-              >
-                {node.question}
-              </Text>
-              <div className="radio-group">
-                <AnswersWrapper>
-                  {node.answers.map((answ, index) => (
-                    <AnswerLabel
-                      style={{
-                        fontFamily: '"Rubik", sans-serif',
-                      }}
-                    >
-                      <AnswerInput
-                        type="radio"
-                        name="Siemka"
-                        key={index}
-                        value={answ.value}
-                        onChange={(e) =>
-                          handleRadioClick(answ.value, answ.answer)
-                        }
-                        onSelect={(e) => setIsChecked(true)}
-                      />
-                      {answ.answer}
-                    </AnswerLabel>
+      <Wrapper>
+        <Text h2 size={18} weight="bold" style={{ marginBottom: "10px" }}>
+          {formQuery.name}
+        </Text>
+        <Text>{formQuery.description && formQuery.description}</Text>
+        <Pagination>
+          {toJson.product.questions.map((node, index) => (
+            <PaginationDot className={step >= index && "active"} key={index}>
+              {index + 1}
+            </PaginationDot>
+          ))}
+        </Pagination>
+        {toJson.product.questions.map(
+          (node, index) =>
+            step === index && (
+              <>
+                <AnswersContainer>
+                  <Text
+                    size={18}
+                    key={index}
+                    style={{
+                      paddingBottom: "10px",
+                      fontFamily: '"Rubik", sans-serif',
+                    }}
+                  >
+                    {node.question}
+                  </Text>
+                  <div className="radio-group">
+                    <AnswersWrapper>
+                      {node.answers.map((answ, index) => (
+                        <AnswerLabel
+                          style={{
+                            fontFamily: '"Rubik", sans-serif',
+                          }}
+                        >
+                          <AnswerInput
+                            type="radio"
+                            name="Siemka"
+                            key={index}
+                            value={answ.value}
+                            onChange={(e) =>
+                              handleRadioClick(answ.value, answ.answer)
+                            }
+                            onSelect={(e) => setIsChecked(true)}
+                          />
+                          {answ.answer}
+                        </AnswerLabel>
+                      ))}
+                    </AnswersWrapper>
+                  </div>
+                </AnswersContainer>
+                {node.explanation &&
+                  node.explanation.map((explanation, index) => (
+                    <ExplanationWrapper>
+                      <ExplanationQuestion>
+                        {explanation.answer}
+                      </ExplanationQuestion>
+                      <ExplanationDescription>
+                        {explanation.description}
+                      </ExplanationDescription>
+                    </ExplanationWrapper>
                   ))}
-                </AnswersWrapper>
-              </div>
-            </>
-          )
-      )}
+              </>
+            )
+        )}
 
-      {alert && <AlertInfo>Choose answer</AlertInfo>}
+        {alert && <AlertInfo>Choose answer</AlertInfo>}
+        {step === toJson.product.questions.length && (
+          <ProposedPriceWrapper>
+            <StyledSumResult>
+              Proposed price: £{totalPrice + total}
+            </StyledSumResult>
+            <StyledNavButton onClick={handleAddToCartButton}>
+              <Text
+                color="#ffffff"
+                size={16}
+                weight="bold"
+                style={{ fontFamily: '"Rubik", sans-serif', fontWeight: 400 }}
+              >
+                Add to cart
+              </Text>
+            </StyledNavButton>
+          </ProposedPriceWrapper>
+        )}
+      </Wrapper>
       <ButtonsWrapper>
         <NavButton onClick={(e) => handleBackButton()}>
           <Text
@@ -271,24 +348,6 @@ const Form = ({
           </NavButton>
         )}
       </ButtonsWrapper>
-
-      {step === toJson.product.questions.length && (
-        <ProposedPriceWrapper>
-          <StyledSumResult>
-            Proposed price: £{totalPrice + total}
-          </StyledSumResult>
-          <StyledNavButton onClick={handleAddToCartButton}>
-            <Text
-              color="#ffffff"
-              size={16}
-              weight="bold"
-              style={{ fontFamily: '"Rubik", sans-serif', fontWeight: 400 }}
-            >
-              Add to cart
-            </Text>
-          </StyledNavButton>
-        </ProposedPriceWrapper>
-      )}
     </Container>
   );
 };

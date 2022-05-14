@@ -42,26 +42,79 @@ const RemoveButton = styled.button`
   background-color: #af0000;
   border: 2px solid black;
   position: absolute;
-  top: 15px;
+  /* top: 15px;
+  right: 15px; */
+  top: 49px;
   right: 15px;
   border-radius: 50px;
   color: #fff;
   cursor: pointer;
+  z-index: 2;
 `;
 
-const Cart = ({ cartItems, setIsQuote, handleRemoveFromCart }) => {
+const EditButton = styled.button`
+  width: 45px;
+  height: 27px;
+  background-color: #4f9c44;
+  border: 2px solid black;
+  position: absolute;
+  /* top: 15px;
+  right: 15px; */
+  top: 49px;
+  right: 50px;
+  border-radius: 50px;
+  color: #fff;
+  cursor: pointer;
+  z-index: 2;
+`;
+
+const BottomText = styled(Text)`
+  font-family: "Rubik", sans-serif;
+  text-align: center;
+  font-weight: 400;
+  margin-top: 15px;
+
+  &.isHidden {
+    display: none;
+  }
+`;
+
+const StyledText = styled(Text)`
+  position: relative;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+
+  &::before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 104%;
+    transform: translateX(-2%);
+    height: 2px;
+    background-color: #d6d6d6;
+    z-index: 1;
+  }
+`;
+
+const Cart = ({
+  cartItems,
+  setIsQuote,
+  handleRemoveFromCart,
+  handleEditFromCart,
+}) => {
   return (
     <Container>
       <Wrapper>
         <Text size={24} weight="medium">
-          Your cart ({cartItems.length}):
+          Your cart ({cartItems && cartItems.length}):
         </Text>
         {cartItems &&
           cartItems.map((node, index) => (
             <Box key={index}>
-              <Text size={20} weight="bold">
+              <StyledText size={20} weight="bold">
                 {node.productName}
-              </Text>
+              </StyledText>
               {node.productQuestions.map((questionNode, index) => (
                 <AnswerWrapper>
                   <Text key={index}>
@@ -72,11 +125,15 @@ const Cart = ({ cartItems, setIsQuote, handleRemoveFromCart }) => {
               <Text size={24} weight="medium">
                 Proposed Price: £{node.proposedPrice}
               </Text>
+              <EditButton onClick={(e) => handleEditFromCart(index)}>
+                EDIT
+              </EditButton>
               <RemoveButton onClick={(e) => handleRemoveFromCart(index)}>
                 X
               </RemoveButton>
             </Box>
           ))}
+        <BottomText>Start typing to add another product</BottomText>
         <StyledButton onClick={(e) => setIsQuote(true)}>GET QUOTE</StyledButton>
       </Wrapper>
     </Container>

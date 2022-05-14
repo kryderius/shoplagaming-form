@@ -1,44 +1,39 @@
 {
   "product": {
-    "name": "Play Station 4",
-    "startPrice": 400,
+    "name": "The Witcher 3 (XONE)",
+    "startPrice": 20,
     "questions": [
       {
-        "question": "Czy ma opakowanie?",
+        "question": "Does it have a box?",
         "answers": [
           {
-            "answer": "Tak",
+            "answer": "Yes",
             "value": 0
           },
           {
-            "answer": "Nie",
-            "value": -10
+            "answer": "No",
+            "value": -5
+          },
+          {
+            "answer": "Yes but broken",
+            "value": -2
           }
         ]
       },
       {
-        "question": "Czy ma ładowarke?",
+        "question": "Does the plate have scratches?",
         "answers": [
           {
-            "answer": "Tak",
+            "answer": "Yes, a little",
+            "value": -3
+          },
+          {
+            "answer": "No",
             "value": 0
           },
           {
-            "answer": "Nie",
-            "value": -10
-          }
-        ]
-      },
-      {
-        "question": "Czy ma Pady?",
-        "answers": [
-          {
-            "answer": "Tak",
-            "value": 0
-          },
-          {
-            "answer": "Nie",
-            "value": -10
+            "answer": "Yes",
+            "value": -5
           }
         ]
       }

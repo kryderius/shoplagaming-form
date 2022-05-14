@@ -12,8 +12,8 @@ const Container = styled.div`
 const Wrapper = styled.div`
   background-color: #f4f4f4;
   border-radius: 10px;
-  padding: 15px;
-  border: 1px solid #d6d6d6;
+  /* padding: 15px; */
+  border: 2px solid #d6d6d6;
 `;
 
 const Headline = styled.h1`
@@ -24,11 +24,22 @@ const Headline = styled.h1`
 const Box = styled.div`
   display: grid;
   grid-template-columns: 60% 20% 20%;
+  border-bottom: 1px solid #d6d6d6;
+
+  p {
+    border-right: 1px solid #d6d6d6;
+    padding: 10px 0;
+  }
 `;
 
 const TotalBox = styled.div`
   display: grid;
   grid-template-columns: 60% 20%;
+
+  p {
+    border-right: 1px solid #d6d6d6;
+    padding: 10px 0;
+  }
 `;
 
 const StyledButton = styled.button`
@@ -43,11 +54,34 @@ const StyledButton = styled.button`
   align-self: flex-end;
 `;
 
-const Quote = ({ cartItems, setIsApproved, setIsQuote }) => {
+const RemoveButton = styled.button`
+  width: 27px;
+  height: 27px;
+  background-color: #af0000;
+  border: 2px solid black;
+  border-radius: 50px;
+  color: #fff;
+  cursor: pointer;
+  z-index: 2;
+  align-self: center;
+  justify-self: center;
+`;
+
+const Quote = ({
+  cartItems,
+  setIsApproved,
+  setIsQuote,
+  handleRemoveFromCart,
+}) => {
   const handleApproveButton = () => {
     setIsApproved(true);
     setIsQuote(false);
   };
+  let totalPrice = cartItems.reduce(
+    (total, currentValue) => (total = total + currentValue.proposedPrice),
+    0
+  );
+
   return (
     <Container>
       <Headline>Quote</Headline>
@@ -55,15 +89,18 @@ const Quote = ({ cartItems, setIsApproved, setIsQuote }) => {
         {cartItems &&
           cartItems.map((node, index) => (
             <Box key={index}>
-              <Text size={20} weight="medium">
+              <Text size={20} weight="medium" style={{ paddingLeft: "15px" }}>
                 {node.productName}
               </Text>
-              <Text size={20} weight="medium">
+              <Text size={20} weight="medium" style={{ textAlign: "center" }}>
                 £{node.proposedPrice}
               </Text>
+              <RemoveButton onClick={(e) => handleRemoveFromCart(index)}>
+                X
+              </RemoveButton>
             </Box>
           ))}
-        {cartItems.length !== 0 && (
+        {cartItems && cartItems.length !== 0 && (
           <TotalBox>
             <Text
               size={20}
@@ -72,8 +109,8 @@ const Quote = ({ cartItems, setIsApproved, setIsQuote }) => {
             >
               Total:
             </Text>
-            <Text size={20} weight="medium">
-              Total:
+            <Text size={20} weight="medium" style={{ textAlign: "center" }}>
+              £{totalPrice}
             </Text>
           </TotalBox>
         )}

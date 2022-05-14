@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import styled from "styled-components";
 import { useForm } from "react-hook-form";
-import axios from "axios";
+import { Text } from "@nextui-org/react";
 
 const Container = styled.div`
   max-width: 900px;
@@ -49,60 +49,96 @@ const Wrapper = styled.div`
   }
 `;
 
-const CountryErrorInfo = styled.p`
-  color: red;
+const StyledButton = styled.button`
+  width: 90px;
+  height: 30px;
+  background-color: #af0000;
+  color: #fff;
+  border: 2px solid black;
+  border-radius: 7px;
+  cursor: pointer;
+  margin-top: 30px;
+  align-self: flex-end;
 `;
 
-const Checkout = ({ cartItems }) => {
-  const [typedCity, setTypedCity] = useState();
-  const [countryError, setCountryError] = useState(false);
+const BottomText = styled(Text)`
+  font-family: "Rubik", sans-serif;
+  text-align: center;
+  font-weight: 400;
+  margin-top: 15px;
 
-  // const mapRequest = cartItems.map((node) => <table>{node.productName}</table>);
+  &.isHidden {
+    display: none;
+  }
+`;
 
-  var bodyFormData = new FormData();
-  bodyFormData.append("body", cartItems);
+const FormBottom = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+`;
 
-  const toJson = JSON.stringify(cartItems, null, 4);
+// const CountryErrorInfo = styled.p`
+//   color: red;
+// `;
+
+const Checkout = ({ cartItems, setIsConfirmation }) => {
+  // const [typedCity, setTypedCity] = useState("");
+  // const [countryError, setCountryError] = useState();
+  // const [isCountryValid, setIsCountryValid] = useState(false);
+  // const [isOrderSend, setIsOrderSend] = useState(false);
+  // const [isFormLoading, setIsFormLoading] = useState(false);
+
+  var formData = new FormData();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
-  const onSubmit = (data, cartItems) => {
-    setCountryError(false);
-    axios
-      .get(
-        `https://nominatim.openstreetmap.org/?addressdetails=1&city=${data.City}&format=json&limit=1`
-      )
-      .then((response) => setTypedCity(response.data[0].address.country_code))
+
+  const onSubmit = (data) => {
+    formData.append("contact_message", JSON.stringify(cartItems));
+    formData.append("contact_order", JSON.stringify(cartItems, null, 2));
+    formData.append("contact_name", data.FirstName);
+    formData.append("contact_secondname", data.LastName);
+    formData.append("contact_email", data.email);
+    formData.append("contact_addressone", data.Address1);
+    formData.append("contact_addresstwo", data.Address2);
+    formData.append("contact_country", data.Country);
+    formData.append("contact_city", data.City);
+    formData.append("contact_postcode", data.postcode);
+    formData.append("contact_phonenumber", data.phoneNumber);
+    formData.append("contact_county", data.County);
+
+    fetch("https://shoplagaming.co.uk/wp-json/contact/v1/send", {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => {})
+      .then((data) => console.log(data))
       .catch((error) => console.log(error));
 
-    if (typedCity !== "gb") {
-      setCountryError(true);
-    } else {
-      setCountryError(false);
-      axios.defaults.headers.post["Content-Type"] = "multipart/form-data";
-      axios
-        .post("https://formsubmit.co/ajax/krydegamer@gmail.com", {
-          FirstName: data.FirstName,
-          SecondName: data.LastName,
-          Address1: data.Address1,
-          Address2: data.Address2,
-          Country: data.Country,
-          City: data.City,
-          County: data.County && data.County,
-          Postcode: data.postcode,
-          eMail: data.email,
-          phoneNumber: data.phoneNumber,
-          body: toJson,
-        })
-        .then((response) => console.log(response))
-        .catch((error) => console.log(error));
-    }
-  };
+    fetch("https://shoplagaming.co.uk/wp-json/contact/v1/sendconsumer", {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => res.json())
+      .then((data) => console.log(data))
+      .catch((error) => console.log(error));
 
-  console.log(typedCity);
+    fetch("https://shoplagaming.co.uk/wp-json/orders/v1/addorder", {
+      method: "POST",
+      body: formData,
+    })
+      .then((res) => {
+        if (res.status === 200) {
+          setIsConfirmation(true);
+        }
+      })
+      .then((data) => console.log(data))
+      .catch((error) => console.log(error));
+  };
 
   return (
     <Container>
@@ -141,12 +177,9 @@ const Checkout = ({ cartItems }) => {
 
           <label className="input-label">
             <input
-              placeholder="Address 2"
-              {...register("Address2", { required: true })}
+              placeholder="Address 2 (Optional)"
+              {...register("Address2")}
             />
-            {errors.Address2 && (
-              <span className="required-info">This field is required</span>
-            )}
           </label>
           <label className="input-label short">
             <input
@@ -163,7 +196,9 @@ const Checkout = ({ cartItems }) => {
             <input
               className="short"
               placeholder="City"
-              {...register("City", { required: true })}
+              {...register("City", {
+                required: true,
+              })}
             />
             {errors.City && (
               <span className="required-info">This field is required</span>
@@ -192,12 +227,9 @@ const Checkout = ({ cartItems }) => {
           <label className="input-label short">
             <input
               className="short"
-              placeholder="Postcode"
-              {...register("phoneNumber", { required: true })}
+              placeholder="Phone (Optional)"
+              {...register("phoneNumber")}
             />
-            {errors.phoneNumber && (
-              <span className="required-info">This field is required</span>
-            )}
           </label>
 
           <label className="input-label short">
@@ -210,30 +242,24 @@ const Checkout = ({ cartItems }) => {
               <span className="required-info">This field is required</span>
             )}
           </label>
-          {/* <input type="submit" /> */}
-          <button type="submit">SUBMIT</button>
+          <FormBottom>
+            <BottomText>
+              Before you press "Submit" please make sure all your details are
+              correct.
+              <br />
+              You will receive a postage label and instructions shortly.
+            </BottomText>
+            <StyledButton type="submit">SUBMIT</StyledButton>
+          </FormBottom>
         </form>
       </Wrapper>
-      {countryError && (
+      {/* {countryError && (
         <CountryErrorInfo>
           Sorry, but we are not picking up products from outside the UK
         </CountryErrorInfo>
-      )}
+      )} */}
     </Container>
   );
 };
-
-// const EmailTemplate = ({ cartItems }) => {
-//   return (
-//     <table>
-//       {cartItems.map((node, index) => (
-//         <>
-//           <span>{node.productName}</span>
-//           <span>{node.proposedPrice}</span>
-//         </>
-//       ))}
-//     </table>
-//   );
-// };
 
 export default Checkout;
